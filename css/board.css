@@ -1,0 +1,23 @@
+.cell {
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+.board {
+    width: 800px;
+    height: 800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+}
+
+.white {
+    background-color: rgb(255, 255, 255);
+}
+
+.black {
+    background-color: rgb(182, 182, 182);
+}
