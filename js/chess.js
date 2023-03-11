@@ -45,7 +45,7 @@ class Figure {
     }
 }
 
-function reloadBoard(GameState) {   
+function reloadBoard(GameState) {
     // Перезавантажує дошку на сторінці зі станом дошки з GameState
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
@@ -65,26 +65,40 @@ class Pawn extends Figure {
         super(color, 'pawn', row, col);
         this.isFirstMove = true; // Чи перший хід пішака
     }
-    allPosibleMoves() {
+    allPosibleMoves(GameState) {
+        // Повертає правила для пішака
         const AllposibleMoves = [];
         if (this.color === 'white') {
-            // Повертає правила для білого пішака
-            if (this.isFirstMove) {
-                // Повертає правила для першого ходу білого пішака
-                AllposibleMoves.push([this.row - 2, this.col]);
-                this.isFirstMove = false;
+            if (GameState.board[this.row + 1][this.col] === '') {
+                // Повертає правила для білого пішака
+                if (this.isFirstMove) {
+                    // Повертає правила для першого ходу білого пішака
+                    AllposibleMoves.push([this.row + 2, this.col]);
+                    this.isFirstMove = false;
+                }
+                AllposibleMoves.push([this.row + 1, this.col]);
             }
-            AllposibleMoves.push([this.row - 1, this.col]);
+            if (GameState.board[this.row + 1][this.col + 1].test(/B-/)) {
+                AllposibleMoves.push([this.row + 1, this.col + 1]);
+            }
+            if (GameState.board[this.row + 1][this.col - 1].test(/B-/)) {
+                AllposibleMoves.push([this.row + 1, this.col - 1]);
+            }
         } else {
             // Повертає правила для чорного пішака
             if (this.isFirstMove) {
                 // Повертає правила для першого ходу чорного пішака
-                AllposibleMoves.push([this.row + 2, this.col]);
+                AllposibleMoves.push([this.row - 2, this.col]);
                 this.isFirstMove = false;
             }
-            AllposibleMoves.push([this.row + 1, this.col]);
+            AllposibleMoves.push([this.row - 1, this.col]);
+            if (GameState.board[this.row - 1][this.col + 1].test(/W-/)) {
+                AllposibleMoves.push([this.row - 1, this.col + 1]);
+            }
+            if (GameState.board[this.row - 1][this.col - 1].test(/W-/)) {
+                AllposibleMoves.push([this.row - 1, this.col - 1]);
+            }
         }
-        // Повертає правила для пішака
 
         return AllposibleMoves;
     }
@@ -96,16 +110,66 @@ class Rook extends Figure {
         super(color, 'rook', row, col);
         this.isFirstMove = true; // Чи перший хід тури
     }
-    get checkForCastling() {
+    checkForCastling(GameState) {
         // Перевіряє чи можна зробити рокірування
     }
 
-    allPosibleMoves() {
+    allPosibleMoves(GameState) {
         // Повертає правила для тури
+        let moveup = true;
+        let movedown = true;
+        let moveleft = true;
+        let moveright = true;
         const AllposibleMoves = [];
-        for (let i = 0; i < 8; i++) {
-            AllposibleMoves.push([this.row, i]);
-            AllposibleMoves.push([i, this.col]);
+        for (let i = 1; i < 8; i++) {
+            if (this.row + i < 8 && movedown) {
+                if (GameState.board[this.row + i][this.col][0] === this.color[0].toUpperCase()) {
+                    movedown = false;
+                }
+                if (GameState.board[this.row + i][this.col] === '') {
+                    AllposibleMoves.push([this.row + i, this.col]);
+                }
+                if (GameState.board[this.row + i][this.col][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row + i, this.col]);
+                    movedown = false;
+                }
+            }
+            if (this.row - i >= 0 && moveup) {
+                if (GameState.board[this.row - i][this.col][0] === this.color[0].toUpperCase()) {
+                    moveup = false;
+                }
+                if (GameState.board[this.row - i][this.col] === '') {
+                    AllposibleMoves.push([this.row - i, this.col]);
+                }
+                if (GameState.board[this.row - i][this.col][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row - i, this.col]);
+                    moveup = false;
+                }
+            }
+            if (this.col + i < 8 && moveright) {
+                if (GameState.board[this.row][this.col + i][0] === this.color[0].toUpperCase()) {
+                    moveright = false;
+                }
+                if (GameState.board[this.row][this.col + i] === '') {
+                    AllposibleMoves.push([this.row, this.col + i]);
+                }
+                if (GameState.board[this.row][this.col + i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row, this.col + i]);
+                    moveright = false;
+                }
+            }
+            if (this.col - i >= 0 && moveleft) {
+                if (GameState.board[this.row][this.col - i][0] === this.color[0].toUpperCase()) {
+                    moveleft = false;
+                }
+                if (GameState.board[this.row][this.col - i] === '') {
+                    AllposibleMoves.push([this.row, this.col - i]);
+                }
+                if (GameState.board[this.row][this.col - i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row, this.col - i]);
+                    moveleft = false;
+                }
+            }
         }
         return AllposibleMoves;
     }
@@ -119,14 +183,30 @@ class Knight extends Figure {
     allPosibleMoves() {
         // Повертає правила для коня
         const AllposibleMoves = [];
-        AllposibleMoves.push([this.row + 2, this.col + 1]);
-        AllposibleMoves.push([this.row + 2, this.col - 1]);
-        AllposibleMoves.push([this.row - 2, this.col + 1]);
-        AllposibleMoves.push([this.row - 2, this.col - 1]);
-        AllposibleMoves.push([this.row + 1, this.col + 2]);
-        AllposibleMoves.push([this.row + 1, this.col - 2]);
-        AllposibleMoves.push([this.row - 1, this.col + 2]);
-        AllposibleMoves.push([this.row - 1, this.col - 2]);
+        if (this.row + 2 < 8 && this.col + 1 < 8 && GameState.board[this.row + 2][this.col + 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row + 2, this.col + 1]);
+        }
+        if (this.row + 2 < 8 && this.col - 1 >= 0 && GameState.board[this.row + 2][this.col - 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row + 2, this.col - 1]);
+        }
+        if (this.row - 2 >= 0 && this.col + 1 < 8 && GameState.board[this.row - 2][this.col + 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row - 2, this.col + 1]);
+        }
+        if (this.row - 2 >= 0 && this.col - 1 >= 0 && GameState.board[this.row - 2][this.col - 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row - 2, this.col - 1]);
+        }
+        if (this.row + 1 < 8 && this.col + 2 < 8 && GameState.board[this.row + 1][this.col + 2][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row + 1, this.col + 2]);
+        }
+        if (this.row + 1 < 8 && this.col - 2 >= 0 && GameState.board[this.row + 1][this.col - 2][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row + 1, this.col - 2]);
+        }
+        if (this.row - 1 >= 0 && this.col + 2 < 8 && GameState.board[this.row - 1][this.col + 2][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row - 1, this.col + 2]);
+        }
+        if (this.row - 1 >= 0 && this.col - 2 >= 0 && GameState.board[this.row - 1][this.col - 2][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row - 1, this.col - 2]);
+        }
 
         return AllposibleMoves;
     }
@@ -138,12 +218,61 @@ class Bishop extends Figure {
     }
     allPosibleMoves() {
         // Повертає правила для слона
+        let moveDownRight = true;
+        let moveDownLeft = true;
+        let moveUpRight = true;
+        let moveUpLeft = true;
+        
         const AllposibleMoves = [];
         for (let i = 0; i < 8; i++) {
-            AllposibleMoves.push([this.row + i, this.col + i]);
-            AllposibleMoves.push([this.row + i, this.col - i]);
-            AllposibleMoves.push([this.row - i, this.col + i]);
-            AllposibleMoves.push([this.row - i, this.col - i]);
+            if (this.row + i < 8 && this.col + i < 8 && moveDownRight) {
+                if (GameState.board[this.row + i][this.col + i][0] === this.color[0].toUpperCase()) {
+                    moveDownRight = false;
+                }
+                if (GameState.board[this.row + i][this.col + i] === '') {
+                    AllposibleMoves.push([this.row + i, this.col + i]);
+                }
+                if (GameState.board[this.row + i][this.col + i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row + i, this.col + i]);
+                    moveDownRight = false;
+                }
+            }
+            if (this.row + i < 8 && this.col - i >= 0 && moveDownLeft) {
+                if (GameState.board[this.row + i][this.col - i][0] === this.color[0].toUpperCase()) {
+                    moveDownLeft = false;
+                }
+                if (GameState.board[this.row + i][this.col - i] === '') {
+                    AllposibleMoves.push([this.row + i, this.col - i]);
+                }
+                if (GameState.board[this.row + i][this.col - i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row + i, this.col - i]);
+                    moveDownLeft = false;
+                }
+            }
+            if (this.row - i >= 0 && this.col + i < 8 && moveUpRight) {
+                if (GameState.board[this.row - i][this.col + i][0] === this.color[0].toUpperCase()) {
+                    moveUpRight = false;
+                }
+                if (GameState.board[this.row - i][this.col + i] === '') {
+                    AllposibleMoves.push([this.row - i, this.col + i]);
+                }
+                if (GameState.board[this.row - i][this.col + i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row - i, this.col + i]);
+                    moveUpRight = false;
+                }
+            }
+            if (this.row - i >= 0 && this.col - i >= 0 && moveUpLeft) {
+                if (GameState.board[this.row - i][this.col - i][0] === this.color[0].toUpperCase()) {
+                    moveUpLeft = false;
+                }
+                if (GameState.board[this.row - i][this.col - i] === '') {
+                    AllposibleMoves.push([this.row - i, this.col - i]);
+                }
+                if (GameState.board[this.row - i][this.col - i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row - i, this.col - i]);
+                    moveUpLeft = false;
+                }
+            }
         }
         return AllposibleMoves;
     }
@@ -155,14 +284,112 @@ class Queen extends Figure {
     }
     allPosibleMoves() {
         // Повертає правила для ферзя
+        let moveDownRight = true;
+        let moveDownLeft = true;
+        let moveUpRight = true;
+        let moveUpLeft = true;
+        let moveup = true;
+        let movedown = true;
+        let moveleft = true;
+        let moveright = true;
         const AllposibleMoves = [];
         for (let i = 0; i < 8; i++) {
-            AllposibleMoves.push([this.row, i]);
-            AllposibleMoves.push([i, this.col]);
-            AllposibleMoves.push([this.row + i, this.col + i]);
-            AllposibleMoves.push([this.row + i, this.col - i]);
-            AllposibleMoves.push([this.row - i, this.col + i]);
-            AllposibleMoves.push([this.row - i, this.col - i]);
+            if (this.row + i < 8 && this.col + i < 8 && moveDownRight) {
+                if (GameState.board[this.row + i][this.col + i][0] === this.color[0].toUpperCase()) {
+                    moveDownRight = false;
+                }
+                if (GameState.board[this.row + i][this.col + i] === '') {
+                    AllposibleMoves.push([this.row + i, this.col + i]);
+                }
+                if (GameState.board[this.row + i][this.col + i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row + i, this.col + i]);
+                    moveDownRight = false;
+                }
+            }
+            if (this.row + i < 8 && this.col - i >= 0 && moveDownLeft) {
+                if (GameState.board[this.row + i][this.col - i][0] === this.color[0].toUpperCase()) {
+                    moveDownLeft = false;
+                }
+                if (GameState.board[this.row + i][this.col - i] === '') {
+                    AllposibleMoves.push([this.row + i, this.col - i]);
+                }
+                if (GameState.board[this.row + i][this.col - i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row + i, this.col - i]);
+                    moveDownLeft = false;
+                }
+            }
+            if (this.row - i >= 0 && this.col + i < 8 && moveUpRight) {
+                if (GameState.board[this.row - i][this.col + i][0] === this.color[0].toUpperCase()) {
+                    moveUpRight = false;
+                }
+                if (GameState.board[this.row - i][this.col + i] === '') {
+                    AllposibleMoves.push([this.row - i, this.col + i]);
+                }
+                if (GameState.board[this.row - i][this.col + i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row - i, this.col + i]);
+                    moveUpRight = false;
+                }
+            }
+            if (this.row - i >= 0 && this.col - i >= 0 && moveUpLeft) {
+                if (GameState.board[this.row - i][this.col - i][0] === this.color[0].toUpperCase()) {
+                    moveUpLeft = false;
+                }
+                if (GameState.board[this.row - i][this.col - i] === '') {
+                    AllposibleMoves.push([this.row - i, this.col - i]);
+                }
+                if (GameState.board[this.row - i][this.col - i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row - i, this.col - i]);
+                    moveUpLeft = false;
+                }
+            }
+            if (this.row + i < 8 && movedown) {
+                if (GameState.board[this.row + i][this.col][0] === this.color[0].toUpperCase()) {
+                    movedown = false;
+                }
+                if (GameState.board[this.row + i][this.col] === '') {
+                    AllposibleMoves.push([this.row + i, this.col]);
+                }
+                if (GameState.board[this.row + i][this.col][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row + i, this.col]);
+                    movedown = false;
+                }
+            }
+            if (this.row - i >= 0 && moveup) {
+                if (GameState.board[this.row - i][this.col][0] === this.color[0].toUpperCase()) {
+                    moveup = false;
+                }
+                if (GameState.board[this.row - i][this.col] === '') {
+                    AllposibleMoves.push([this.row - i, this.col]);
+                }
+                if (GameState.board[this.row - i][this.col][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row - i, this.col]);
+                    moveup = false;
+                }
+            }
+            if (this.col + i < 8 && moveright) {
+                if (GameState.board[this.row][this.col + i][0] === this.color[0].toUpperCase()) {
+                    moveright = false;
+                }
+                if (GameState.board[this.row][this.col + i] === '') {
+                    AllposibleMoves.push([this.row, this.col + i]);
+                }
+                if (GameState.board[this.row][this.col + i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row, this.col + i]);
+                    moveright = false;
+                }
+            }
+            if (this.col - i >= 0 && moveleft) {
+                if (GameState.board[this.row][this.col - i][0] === this.color[0].toUpperCase()) {
+                    moveleft = false;
+                }
+                if (GameState.board[this.row][this.col - i] === '') {
+                    AllposibleMoves.push([this.row, this.col - i]);
+                }
+                if (GameState.board[this.row][this.col - i][0] !== this.color[0].toUpperCase()) {
+                    AllposibleMoves.push([this.row, this.col - i]);
+                    moveleft = false;
+                }
+            }
         }
         return AllposibleMoves;
     }
@@ -173,20 +400,37 @@ class King extends Figure {
         super(color, 'king', row, col);
         this.isFirstMove = true; // Чи перший хід короля
     }
-    get checkForCastling() {
+    checkForCastling(GameState) {
         // Перевіряє чи можна зробити рокірування
     }
     allPosibleMoves() {
         // Повертає правила для короля
         const AllposibleMoves = [];
-        AllposibleMoves.push([this.row + 1, this.col + 1]);
-        AllposibleMoves.push([this.row + 1, this.col - 1]);
-        AllposibleMoves.push([this.row - 1, this.col + 1]);
-        AllposibleMoves.push([this.row - 1, this.col - 1]);
-        AllposibleMoves.push([this.row + 1, this.col]);
-        AllposibleMoves.push([this.row - 1, this.col]);
-        AllposibleMoves.push([this.row, this.col + 1]);
-        AllposibleMoves.push([this.row, this.col - 1]);
+        if (this.row + 1 < 8 && this.col + 1 < 8 && GameState.board[this.row + 1][this.col + 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row + 1, this.col + 1]);
+        }
+        if (this.row + 1 < 8 && this.col - 1 >= 0 && GameState.board[this.row + 1][this.col - 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row + 1, this.col - 1]);
+        }
+        if (this.row - 1 >= 0 && this.col + 1 < 8 && GameState.board[this.row - 1][this.col + 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row - 1, this.col + 1]);
+        }
+        if (this.row - 1 >= 0 && this.col - 1 >= 0 && GameState.board[this.row - 1][this.col - 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row - 1, this.col - 1]);
+        }
+        if (this.row + 1 < 8 && GameState.board[this.row + 1][this.col][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row + 1, this.col]);
+        }
+        if (this.row - 1 >= 0 && GameState.board[this.row - 1][this.col][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row - 1, this.col]);
+        }
+        if (this.col + 1 < 8 && GameState.board[this.row][this.col + 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row, this.col + 1]);
+        }
+        if (this.col - 1 >= 0 && GameState.board[this.row][this.col - 1][0] !== this.color[0].toUpperCase()) {
+            AllposibleMoves.push([this.row, this.col - 1]);
+        }
+
         return AllposibleMoves;
     }
 }
