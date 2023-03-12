@@ -1,6 +1,6 @@
 
 
-class GameState {
+export class GameState {
     constructor() {
         this.board = [
             ['W-R', 'W-N', 'W-B', 'W-Q', 'W-K', 'W-B', 'W-N', 'W-R'],
@@ -19,6 +19,12 @@ class GameState {
     }
     moveFigure(figure, newPos) {
         // Переміщує фігуру на нову позицію на дошці
+        let moveFigure = this.board[figure.row][figure.col];
+        this.board[figure.row][figure.col] = '';
+        this.board[newPos[0]][newPos[1]] = moveFigure;
+        figure.row = newPos[0];
+        figure.col = newPos[1];
+        this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
     }
     checkForCheck() {
         // Перевіряє чи є шах
@@ -32,7 +38,7 @@ class GameState {
 
 }
 
-class Figure {
+export class Figure {
     constructor(color, type, row, col) {
         this.color = color; // Колір фігури
         this.type = type; // Тип фігури
@@ -45,7 +51,7 @@ class Figure {
     }
 }
 
-function reloadBoard(GameState) {
+export function reloadBoard(GameState) {
     // Перезавантажує дошку на сторінці зі станом дошки з GameState
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
@@ -56,11 +62,11 @@ function reloadBoard(GameState) {
     }
 }
 
-function checkPosibleMoves() {
+export function checkPosibleMoves() {
     // Перевіряє чи можна перемістити фігуру і повертає масив з можливими ходами
 }
 
-class Pawn extends Figure {
+export class Pawn extends Figure {
     constructor(color, row, col) {
         super(color, 'pawn', row, col);
         this.isFirstMove = true; // Чи перший хід пішака
@@ -105,7 +111,7 @@ class Pawn extends Figure {
 
 }
 
-class Rook extends Figure {
+export class Rook extends Figure {
     constructor(color, row, col) {
         super(color, 'rook', row, col);
         this.isFirstMove = true; // Чи перший хід тури
@@ -176,7 +182,7 @@ class Rook extends Figure {
 
 }
 
-class Knight extends Figure {
+export class Knight extends Figure {
     constructor(color, row, col) {
         super(color, 'knight', row, col);
     }
@@ -212,7 +218,7 @@ class Knight extends Figure {
     }
 }
 
-class Bishop extends Figure {
+export class Bishop extends Figure {
     constructor(color, row, col) {
         super(color, 'bishop', row, col);
     }
@@ -278,7 +284,7 @@ class Bishop extends Figure {
     }
 }
 
-class Queen extends Figure {
+export class Queen extends Figure {
     constructor(color, row, col) {
         super(color, 'queen', row, col);
     }
@@ -395,7 +401,7 @@ class Queen extends Figure {
     }
 }
 
-class King extends Figure {
+export class King extends Figure {
     constructor(color, row, col) {
         super(color, 'king', row, col);
         this.isFirstMove = true; // Чи перший хід короля
@@ -434,8 +440,4 @@ class King extends Figure {
         return AllposibleMoves;
     }
 }
-
-
-const newGame = new GameState(); // Створюємо нову гру
-reloadBoard(newGame); // Перезавантажуємо дошку на сторінці
 
