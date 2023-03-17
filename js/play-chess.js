@@ -1,21 +1,54 @@
 import * as chess from './chess.js';
 
-const whiteFigures = {
-    'P': new chess.Pawn('white', 0, 0),
-    'R': new chess.Rook('white', 0, 0),
-    'N': new chess.Knight('white', 0, 0),
-    'B': new chess.Bishop('white', 0, 0),
-    'Q': new chess.Queen('white', 0, 0),
-    'K': new chess.King('white', 0, 0)
+const Figures = {
+    'P': chess.Pawn,
+    'R': chess.Rook,
+    'N': chess.Knight,
+    'B': chess.Bishop,
+    'Q': chess.Queen,
+    'K': chess.King
 }
-const blackFigures = {
-    'P': new chess.Pawn('black', 0, 0),
-    'R': new chess.Rook('black', 0, 0),
-    'N': new chess.Knight('black', 0, 0),
-    'B': new chess.Bishop('black', 0, 0),
-    'Q': new chess.Queen('black', 0, 0),
-    'K': new chess.King('black', 0, 0)
-}
+
 const newGame = new chess.GameState();
-newGame.addFigureOnBoard(whiteFigures, blackFigures);
+//тестова дошка
+
+// newGame.board = [
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', 'WtP', 'WtP', '   ', '   '],
+//     ['   ', '   ', '   ', 'BkP', 'WtQ', 'WtP', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', 'BkP', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   ']
+// ]
+
+newGame.addFigureOnBoard(Figures);
 chess.reloadBoard(newGame);
+
+const board = document.querySelector('.board');
+let takeFigure = true;
+let currentFigure = null;
+board.addEventListener('click', (event) => {
+    const selectedCell = event.target;
+    let selectedFigure = newGame.board[selectedCell.dataset.row][selectedCell.dataset.col];
+    if (takeFigure && currentFigure == null) {
+        selectedFigure.allPosibleMoves(newGame).forEach((move) => {
+            let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
+            cell.classList.add('posiblMove');
+            if (newGame.board[move[0]][move[1]] !== null) {
+                cell.classList.add('posiblAttack');
+            }
+        });
+        currentFigure = selectedFigure;
+        takeFigure = false;
+    } else if (takeFigure === false && currentFigure == selectedFigure) {
+        selectedFigure.allPosibleMoves(newGame).forEach((move) => {
+            let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
+            cell.classList.remove('posiblMove');
+            cell.classList.remove('posiblAttack');
+        });
+        takeFigure = true;
+        currentFigure = null;
+    }
+});
