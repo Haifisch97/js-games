@@ -32,11 +32,9 @@ let currentFigure = null;
 //Прослуховувач подій для вибору фігури і відображення можливих ходів
 board.addEventListener('click', (event) => {
     const selectedCell = event.target;
-    
     let selectedFigure = newGame.board[selectedCell.dataset.row][selectedCell.dataset.col];
-    console.log(selectedFigure);
     if (selectedFigure === null) return;
-    
+    if (selectedFigure.color !== newGame.currentPlayer) return;
     if (takeFigure && currentFigure == null) {
         currentFigure = selectedFigure;
         takeFigure = false;
