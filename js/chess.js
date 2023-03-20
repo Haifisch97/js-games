@@ -3,14 +3,14 @@
 export class GameState {
     constructor() {
         this.board = [
-            ['WtR', 'WtN', 'WtB', 'WtQ', 'WtK', 'WtB', 'WtN', 'WtR'],
-            ['WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP'],
-            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['BkR', 'BkN', 'BkB', 'BkQ', 'BkK', 'BkB', 'BkN', 'BkR'],
             ['BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP'],
-            ['BkR', 'BkN', 'BkB', 'BkQ', 'BkK', 'BkB', 'BkN', 'BkR']
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP'],
+            ['WtR', 'WtN', 'WtB', 'WtQ', 'WtK', 'WtB', 'WtN', 'WtR']
         ]; // Зберігаємо стан дошки в масиві 
         this.currentPlayer = 'white'; // Зберігаємо поточного гравця
         this.check = false; // Чи є шах
@@ -109,7 +109,7 @@ export class Pawn extends Figure {
     allPosibleMoves(GameState) {
         // Повертає правила для пішака
         const AllposibleMoves = [];
-        if (this.color === 'white') {
+        if (this.color === 'black') {
            console.log( GameState.board[this.row + 1][this.col]);
             if (GameState.board[this.row + 1][this.col] === null) {
                 // Повертає правила для білого пішака
@@ -120,16 +120,16 @@ export class Pawn extends Figure {
                 AllposibleMoves.push([this.row + 2, this.col]);
             }
             if (GameState.board[this.row + 1][this.col + 1] !== null && this.row + 1 < 8 && this.col + 1 < 8) {
-                if (GameState.board[this.row + 1][this.col + 1].color === 'black') {
+                if (GameState.board[this.row + 1][this.col + 1].color === 'white') {
                     AllposibleMoves.push([this.row + 1, this.col + 1]);
                 }
             }
             if (GameState.board[this.row + 1][this.col - 1] !== null && this.row + 1 < 8 && this.col - 1 >= 0) {
-                if (GameState.board[this.row + 1][this.col - 1].color === 'black') {
+                if (GameState.board[this.row + 1][this.col - 1].color === 'white') {
                     AllposibleMoves.push([this.row + 1, this.col - 1]);
                 }
             }
-        } else if (this.color === 'black') {
+        } else if (this.color === 'white') {
             if (GameState.board[this.row - 1][this.col] === null) {
                 // Повертає правила для чорного пішака
                 AllposibleMoves.push([this.row - 1, this.col]);
@@ -139,12 +139,12 @@ export class Pawn extends Figure {
                 AllposibleMoves.push([this.row - 2, this.col]);
             }
             if (GameState.board[this.row - 1][this.col + 1] !== null && this.row + 1 < 8 && this.col + 1 < 8) {
-                if (GameState.board[this.row - 1][this.col + 1].color === 'white') {
+                if (GameState.board[this.row - 1][this.col + 1].color === 'black') {
                     AllposibleMoves.push([this.row - 1, this.col + 1]);
                 }
             }
             if (GameState.board[this.row - 1][this.col - 1] !== null && this.row + 1 < 8 && this.col - 1 >= 0) {
-                if (GameState.board[this.row - 1][this.col - 1].color === 'white') {
+                if (GameState.board[this.row - 1][this.col - 1].color === 'black') {
                     AllposibleMoves.push([this.row - 1, this.col - 1]);
                 }
             }
