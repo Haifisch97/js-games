@@ -17,13 +17,13 @@ export class GameState {
         this.checkmate = false; // Чи є мат
         this.stalemate = false; // Чи є пат
     }
-    moveFigure(figure, newCol, newRow) {
-        // Переміщує фігуру на нову позицію на дошці ___________ NEAD REFACTORING!!!!!!!!!!!!!!!!
-        let moveFigure = this.board[figure.row][figure.col];
-        this.board[figure.row][figure.col] = '   ';
+    moveFigure(currentRow ,currentCol, newRow, newCol) {
+        // Переміщує фігуру на нову позицію на дошці 
+        let moveFigure = this.board[currentRow][currentCol];
         this.board[newRow][newCol] = moveFigure;
-        figure.row = newRow;
-        figure.col = newCol;
+        this.board[currentRow][currentCol] = null;
+        moveFigure.row = newRow;
+        moveFigure.col = newCol;
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
     }
     checkForCheck() {
@@ -90,9 +90,12 @@ export function reloadBoard(GameState) {
     }
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
+            let cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
             if (GameState.board[row][col] !== null) {
-                let cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 cell.textContent = figuresList[`${GameState.board[row][col].color} ${GameState.board[row][col].type}`];
+            } else {
+                let cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                cell.textContent = '';
             }
         }
     }
@@ -107,7 +110,7 @@ export class Pawn extends Figure {
         // Повертає правила для пішака
         const AllposibleMoves = [];
         if (this.color === 'white') {
-
+           console.log( GameState.board[this.row + 1][this.col]);
             if (GameState.board[this.row + 1][this.col] === null) {
                 // Повертає правила для білого пішака
                 AllposibleMoves.push([this.row + 1, this.col]);
@@ -121,7 +124,7 @@ export class Pawn extends Figure {
                     AllposibleMoves.push([this.row + 1, this.col + 1]);
                 }
             }
-            if (GameState.board[this.row + 1][this.col - 1] !== null && this.row + 1 < 8 && this.col + 1 < 8) {
+            if (GameState.board[this.row + 1][this.col - 1] !== null && this.row + 1 < 8 && this.col - 1 >= 0) {
                 if (GameState.board[this.row + 1][this.col - 1].color === 'black') {
                     AllposibleMoves.push([this.row + 1, this.col - 1]);
                 }
@@ -140,7 +143,7 @@ export class Pawn extends Figure {
                     AllposibleMoves.push([this.row - 1, this.col + 1]);
                 }
             }
-            if (GameState.board[this.row - 1][this.col - 1] !== null && this.row + 1 < 8 && this.col + 1 < 8) {
+            if (GameState.board[this.row - 1][this.col - 1] !== null && this.row + 1 < 8 && this.col - 1 >= 0) {
                 if (GameState.board[this.row - 1][this.col - 1].color === 'white') {
                     AllposibleMoves.push([this.row - 1, this.col - 1]);
                 }
