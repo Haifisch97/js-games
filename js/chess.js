@@ -16,14 +16,59 @@ export class GameState {
         this.check = false; // Чи є шах
         this.checkmate = false; // Чи є мат
         this.stalemate = false; // Чи є пат
+        this.lastMove = {
+            prevPossition: [null, null],
+            nextPossition: [null, null],
+            lastMovedFigure: null
+        }; // Зберігаємо останній хід
     }
-    moveFigure(currentRow ,currentCol, newRow, newCol) {
+    moveFigure(currentRow, currentCol, newRow, newCol) {
         // Переміщує фігуру на нову позицію на дошці 
         let moveFigure = this.board[currentRow][currentCol];
-        this.board[newRow][newCol] = moveFigure;
-        this.board[currentRow][currentCol] = null;
-        moveFigure.row = newRow;
-        moveFigure.col = newCol;
+        if (this.board[newRow][newCol].color === moveFigure.color) {
+            //Робимо рокіровку
+            let king, rook;
+            if (moveFigure.type === 'king') {
+                king = moveFigure;
+                rook = this.board[newRow][newCol];
+            } else if (moveFigure.type === 'rook') {
+                rook = moveFigure;
+                king = this.board[newRow][newCol];
+            }
+            console.log(king, rook);
+            if (rook.col === 0) {
+                this.board[currentRow][3] = rook;
+                this.board[currentRow][2] = king;
+                this.board[currentRow][0] = null;
+                this.board[currentRow][4] = null;
+                rook.col = 3;
+                king.col = 2;
+                rook.isFirstMove = false;
+                king.isFirstMove = false;
+            } else if (rook.col === 7) {
+                this.board[currentRow][5] = rook;
+                this.board[currentRow][6] = king;
+                this.board[currentRow][7] = null;
+                this.board[currentRow][4] = null;
+                rook.col = 5;
+                king.col = 6;
+                rook.isFirstMove = false;
+                king.isFirstMove = false;
+            } 
+            this.lastMove.prevPossition = [currentRow, currentCol];
+            this.lastMove.nextPossition = [newRow, newCol];
+            this.lastMove.lastMovedFigure = moveFigure;
+        } else {
+            // Переміщуємо фігуру на нову позицію
+            this.lastMove.prevPossition = [currentRow, currentCol];
+            this.lastMove.nextPossition = [newRow, newCol];
+            this.lastMove.lastMovedFigure = moveFigure;
+            this.board[newRow][newCol] = moveFigure;
+            this.board[currentRow][currentCol] = null;
+            moveFigure.row = newRow;
+            moveFigure.col = newCol;
+            moveFigure.hasOwnProperty('isFirstMove') ? moveFigure.isFirstMove = false : null;
+        }
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
     }
     checkForCheck() {
@@ -104,13 +149,13 @@ export function reloadBoard(GameState) {
 export class Pawn extends Figure {
     constructor(color, row, col) {
         super(color, 'pawn', row, col);
-        
+
     }
     allPosibleMoves(GameState) {
         // Повертає правила для пішака
         const AllposibleMoves = [];
         if (this.color === 'black') {
-           console.log( GameState.board[this.row + 1][this.col]);
+            console.log(GameState.board[this.row + 1][this.col]);
             if (GameState.board[this.row + 1][this.col] === null) {
                 // Повертає правила для білого пішака
                 AllposibleMoves.push([this.row + 1, this.col]);
@@ -162,6 +207,29 @@ export class Rook extends Figure {
     }
     checkForCastling(GameState) {
         // Перевіряє чи можна зробити рокірування
+        if (this.isFirstMove) {
+            if (this.color === 'white') {
+                if (this.col === 0 && GameState.board[7][1] === null && GameState.board[7][2] === null && GameState.board[7][3] === null) {
+                    if (GameState.board[7][4].type === 'king' && GameState.board[7][4].isFirstMove) {
+                        return true;
+                    }
+                } else if (this.col === 7 && GameState.board[7][5] === null && GameState.board[7][6] === null) {
+                    if (GameState.board[7][4].type === 'king' && GameState.board[7][4].isFirstMove) {
+                        return true;
+                    }
+                }
+            } else if (this.color === 'black') {
+                if (this.col === 0 && GameState.board[0][1] === null && GameState.board[0][2] === null && GameState.board[0][3] === null) {
+                    if (GameState.board[0][4].type === 'king' && GameState.board[0][4].isFirstMove) {
+                        return true;
+                    }
+                } else if (this.col === 7 && GameState.board[0][5] === null && GameState.board[0][6] === null) {
+                    if (GameState.board[0][4].type === 'king' && GameState.board[0][4].isFirstMove) {
+                        return true;
+                    }
+                }
+            }
+        }
     }
 
     allPosibleMoves(GameState) {
@@ -216,6 +284,14 @@ export class Rook extends Figure {
                 }
             }
         }
+        if (this.color === 'white' && this.checkForCastling(GameState)) {
+            AllposibleMoves.push([7, 4]);
+        }
+        if (this.color === 'black' && this.checkForCastling(GameState)) {
+            AllposibleMoves.push([0, 4]);
+        }
+
+
         return AllposibleMoves;
     }
 
@@ -441,6 +517,25 @@ export class King extends Figure {
     }
     checkForCastling(GameState) {
         // Перевіряє чи можна зробити рокірування
+        let toRight = false;
+        let toLeft = false;
+        if (this.isFirstMove) {
+            if (GameState.board[this.row][this.col + 1] === null && GameState.board[this.row][this.col + 2] === null) {
+                if (GameState.board[this.row][7] !== null) {
+                    if (GameState.board[this.row][7].isFirstMove) {
+                        toRight = true;
+                    }
+                }
+            }
+            if (GameState.board[this.row][this.col - 1] === null && GameState.board[this.row][this.col - 2] === null && GameState.board[this.row][this.col - 3] === null) {
+                if (GameState.board[this.row][0] !== null) {
+                    if (GameState.board[this.row][0].isFirstMove) {
+                        toLeft = true;
+                    }
+                }
+            }
+        }
+        return [toRight, toLeft];
     }
     allPosibleMoves(GameState) {
         // Повертає правила для короля
@@ -500,6 +595,12 @@ export class King extends Figure {
             } else if (GameState.board[this.row - 1][this.col - 1].color !== this.color) {
                 AllposibleMoves.push([this.row - 1, this.col - 1]);
             }
+        }
+        if (this.checkForCastling(GameState)[0]) {
+            AllposibleMoves.push([this.row, this.col + 3]);
+        }
+        if (this.checkForCastling(GameState)[1]) {
+            AllposibleMoves.push([this.row, this.col - 4]);
         }
         return AllposibleMoves;
     }

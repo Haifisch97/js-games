@@ -33,3 +33,7 @@
 .posiblAttack {
     background-image: linear-gradient(rgba(255, 0, 0, 0.3),rgba(255, 0, 0, 0.3));
 }
+
+.lastMove {
+    background-image: linear-gradient(rgba(0, 221, 255, 0.2),rgba(0, 221, 255, 0.2));
+}

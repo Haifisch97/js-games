@@ -12,16 +12,16 @@ const Figures = {
 const newGame = new chess.GameState();
 //тестова дошка
 
-// newGame.board = [
-//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-//     ['   ', '   ', '   ', '   ', 'WtP', 'WtP', '   ', '   '],
-//     ['   ', '   ', '   ', 'BkP', 'WtQ', 'WtP', '   ', '   '],
-//     ['   ', '   ', '   ', '   ', 'BkP', '   ', '   ', '   '],
-//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   ']
-// ]
+ newGame.board = [
+            ['BkR', '   ', '   ', '   ', 'BkK', '   ', '   ', 'BkR'],
+            ['BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP'],
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+            ['WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP'],
+            ['WtR', '   ', '   ', '   ', 'WtK', '   ', '   ', 'WtR']
+        ]
 
 newGame.addFigureOnBoard(Figures);
 chess.reloadBoard(newGame);
@@ -46,7 +46,7 @@ board.addEventListener('click', (event) => {
         selectedFigure.allPosibleMoves(newGame).forEach((move) => {
             let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
             cell.classList.add('posiblMove');
-            if (newGame.board[move[0]][move[1]] !== null) {
+            if (newGame.board[move[0]][move[1]] !== null && newGame.board[move[0]][move[1]].color !== selectedFigure.color) {
                 cell.classList.add('posiblAttack');
             }
         });
