@@ -10,16 +10,17 @@ const Figures = {
 }
 
 const newGame = new chess.GameState();
+newGame.nameFigureList = Figures;
 //тестова дошка
 
  newGame.board = [
             ['BkR', '   ', '   ', '   ', 'BkK', '   ', '   ', 'BkR'],
-            ['BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP'],
+            ['BkP', 'BkP', 'WtP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP'],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-            ['WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP'],
+            ['WtP', 'WtP', 'BkP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP'],
             ['WtR', '   ', '   ', '   ', 'WtK', '   ', '   ', 'WtR']
         ]
 
@@ -78,5 +79,15 @@ board.addEventListener('click', (event) => {
         
         takeFigure = true;
         currentFigure = null;
+    }
+});
+
+const modalWindow = document.querySelector('.change-pawn');
+modalWindow.addEventListener('click', (event) => {
+    if (event.target.tagName === 'BUTTON') {
+    let newFigureName = event.target.dataset.name;
+    chess.upgragePawn(newGame, newFigureName);
+    chess.reloadBoard(newGame);
+    modalWindow.close();
     }
 });

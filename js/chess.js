@@ -13,6 +13,7 @@ export class GameState {
             ['WtR', 'WtN', 'WtB', 'WtQ', 'WtK', 'WtB', 'WtN', 'WtR']
         ]; // Зберігаємо стан дошки в масиві 
         this.currentPlayer = 'white'; // Зберігаємо поточного гравця
+        this.nameFigureList = null;
         this.check = false; // Чи є шах
         this.checkmate = false; // Чи є мат
         this.stalemate = false; // Чи є пат
@@ -25,7 +26,7 @@ export class GameState {
     moveFigure(currentRow, currentCol, newRow, newCol) {
         // Переміщує фігуру на нову позицію на дошці 
         let moveFigure = this.board[currentRow][currentCol];
-        if (this.board[newRow][newCol].color === moveFigure.color) {
+        if (this.board[newRow][newCol] !== null && this.board[newRow][newCol].color === moveFigure.color) {
             //Робимо рокіровку
             let king, rook;
             if (moveFigure.type === 'king') {
@@ -69,6 +70,12 @@ export class GameState {
             moveFigure.col = newCol;
             moveFigure.hasOwnProperty('isFirstMove') ? moveFigure.isFirstMove = false : null;
         }
+        // Перевірка на превращення пішака
+        if (moveFigure.type === 'pawn' && moveFigure.color === 'white' && newRow === 0) {
+            document.querySelector('.change-pawn').showModal();
+        } else if (moveFigure.type === 'pawn' && moveFigure.color === 'black' && newRow === 7) {
+            document.querySelector('.change-pawn').showModal();
+        }
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
     }
     checkForCheck() {
@@ -80,18 +87,18 @@ export class GameState {
     checkForStalemate() {
         // Перевіряє чи є пат
     }
-    addFigureOnBoard(Figures) {
+    addFigureOnBoard() {
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
                 if (this.board[row][col] !== '   ') {
                     if (this.board[row][col][0] === 'W') {
-                        let wfigure = new Figures[this.board[row][col][2]];
+                        let wfigure = new this.nameFigureList[this.board[row][col][2]];
                         wfigure.color = 'white';
                         wfigure.row = row;
                         wfigure.col = col;
                         this.board[row][col] = wfigure;
                     } else if (this.board[row][col][0] === 'B') {
-                        let bfigure = new Figures[this.board[row][col][2]];
+                        let bfigure = new this.nameFigureList[this.board[row][col][2]];
                         bfigure.color = 'black';
                         bfigure.row = row;
                         bfigure.col = col;
@@ -146,6 +153,15 @@ export function reloadBoard(GameState) {
     }
 }
 
+export function upgragePawn(GameState, newFigureName) {
+    // Заміняє пішака на фігуру
+    let newFigure = new GameState.nameFigureList[newFigureName];
+    newFigure.row = GameState.lastMove.nextPossition[0];
+    newFigure.col = GameState.lastMove.nextPossition[1];
+    newFigure.color = GameState.lastMove.lastMovedFigure.color;
+    GameState.board[newFigure.row][newFigure.col] = newFigure;
+}
+
 export class Pawn extends Figure {
     constructor(color, row, col) {
         super(color, 'pawn', row, col);
@@ -155,7 +171,6 @@ export class Pawn extends Figure {
         // Повертає правила для пішака
         const AllposibleMoves = [];
         if (this.color === 'black') {
-            console.log(GameState.board[this.row + 1][this.col]);
             if (GameState.board[this.row + 1][this.col] === null) {
                 // Повертає правила для білого пішака
                 AllposibleMoves.push([this.row + 1, this.col]);
@@ -208,7 +223,7 @@ export class Rook extends Figure {
     checkForCastling(GameState) {
         // Перевіряє чи можна зробити рокірування
         if (this.isFirstMove) {
-            if (this.color === 'white') {
+            if (this.color === 'white' && GameState.board[7][4] !== null) {
                 if (this.col === 0 && GameState.board[7][1] === null && GameState.board[7][2] === null && GameState.board[7][3] === null) {
                     if (GameState.board[7][4].type === 'king' && GameState.board[7][4].isFirstMove) {
                         return true;
@@ -218,7 +233,7 @@ export class Rook extends Figure {
                         return true;
                     }
                 }
-            } else if (this.color === 'black') {
+            } else if (this.color === 'black' && GameState.board[0][4] !== null) {
                 if (this.col === 0 && GameState.board[0][1] === null && GameState.board[0][2] === null && GameState.board[0][3] === null) {
                     if (GameState.board[0][4].type === 'king' && GameState.board[0][4].isFirstMove) {
                         return true;
