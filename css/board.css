@@ -26,6 +26,10 @@
     background-color: rgb(182, 182, 182);
 }
 
+.lastMove {
+    background-image: linear-gradient(rgba(0, 221, 255, 0.2),rgba(0, 221, 255, 0.2));
+}
+
 .posiblMove {
     background-image: linear-gradient(rgba(255, 242, 0, 0.3),rgba(255, 242, 0, 0.3)); 
 }
@@ -34,6 +38,3 @@
     background-image: linear-gradient(rgba(255, 0, 0, 0.3),rgba(255, 0, 0, 0.3));
 }
 
-.lastMove {
-    background-image: linear-gradient(rgba(0, 221, 255, 0.2),rgba(0, 221, 255, 0.2));
-}

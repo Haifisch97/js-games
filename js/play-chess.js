@@ -67,6 +67,7 @@ board.addEventListener('click', (event) => {
     const selectedCell = event.target;
     if (selectedCell.classList.contains('posiblMove') || selectedCell.classList.contains('posiblAttack')) {
         newGame.moveFigure(currentFigure.row, currentFigure.col,Number(selectedCell.dataset.row), Number(selectedCell.dataset.col));
+        indicatorLastMove(newGame);
         chess.reloadBoard(newGame);
         const cellsMoves = document.querySelectorAll('.posiblMove');
         const cellsAttack = document.querySelectorAll('.posiblAttack');
@@ -91,3 +92,17 @@ modalWindow.addEventListener('click', (event) => {
     modalWindow.close();
     }
 });
+
+
+function indicatorLastMove (GameState) {
+    const prevMove = document.querySelectorAll('.lastMove');
+    prevMove.forEach((cell) => {
+        cell.classList.remove('lastMove');
+    });
+    let nextMove = [GameState.lastMove.prevPossition, GameState.lastMove.nextPossition];
+    nextMove.forEach((move) => {
+        let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
+        cell.classList.add('lastMove');
+    });
+
+}

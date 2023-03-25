@@ -36,7 +36,6 @@ export class GameState {
                 rook = moveFigure;
                 king = this.board[newRow][newCol];
             }
-            console.log(king, rook);
             if (rook.col === 0) {
                 this.board[currentRow][3] = rook;
                 this.board[currentRow][2] = king;
@@ -620,4 +619,3 @@ export class King extends Figure {
         return AllposibleMoves;
     }
 }
-
