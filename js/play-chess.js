@@ -15,12 +15,12 @@ newGame.nameFigureList = Figures;
 
  newGame.board = [
             ['BkR', '   ', '   ', '   ', 'BkK', '   ', '   ', 'BkR'],
-            ['BkP', 'BkP', 'WtP', 'BkP', 'BkP', 'BkP', 'BkP', 'BkP'],
+            ['BkP', 'BkP', '   ', '   ', '   ', '   ', 'BkP', 'BkP'],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
             ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-            ['WtP', 'WtP', 'BkP', 'WtP', 'WtP', 'WtP', 'WtP', 'WtP'],
+            ['WtP', '   ', '   ', '   ', '   ', '   ', '   ', 'WtP'],
             ['WtR', '   ', '   ', '   ', 'WtK', '   ', '   ', 'WtR']
         ]
 
@@ -44,7 +44,12 @@ board.addEventListener('click', (event) => {
             currentFigure = null;
             return;
         }
-        selectedFigure.allPosibleMoves(newGame).forEach((move) => {
+        let selectedFigureMoves = selectedFigure.allPosibleMoves(newGame);
+        if (selectedFigure.type === 'king') {
+            selectedFigureMoves = kingMoveRestriction(selectedFigureMoves);
+            
+        }
+        selectedFigureMoves.forEach((move) => {
             let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
             cell.classList.add('posiblMove');
             if (newGame.board[move[0]][move[1]] !== null && newGame.board[move[0]][move[1]].color !== selectedFigure.color) {
@@ -69,6 +74,8 @@ board.addEventListener('click', (event) => {
         newGame.moveFigure(currentFigure.row, currentFigure.col,Number(selectedCell.dataset.row), Number(selectedCell.dataset.col));
         indicatorLastMove(newGame);
         chess.reloadBoard(newGame);
+        newGame.checkForCheck()
+        checkIndicator(newGame);
         const cellsMoves = document.querySelectorAll('.posiblMove');
         const cellsAttack = document.querySelectorAll('.posiblAttack');
         cellsMoves.forEach((cell) => {
@@ -82,7 +89,7 @@ board.addEventListener('click', (event) => {
         currentFigure = null;
     }
 });
-
+// Прослуховувач подій для вибору фігури для заміни пішака
 const modalWindow = document.querySelector('.change-pawn');
 modalWindow.addEventListener('click', (event) => {
     if (event.target.tagName === 'BUTTON') {
@@ -92,8 +99,7 @@ modalWindow.addEventListener('click', (event) => {
     modalWindow.close();
     }
 });
-
-
+// Функція для відображення попереднього ходу
 function indicatorLastMove (GameState) {
     const prevMove = document.querySelectorAll('.lastMove');
     prevMove.forEach((cell) => {
@@ -105,4 +111,26 @@ function indicatorLastMove (GameState) {
         cell.classList.add('lastMove');
     });
 
+}
+
+//Функція для обмеження ходів короля
+function kingMoveRestriction (kingMoves) {
+    let oponentColor = newGame.currentPlayer === 'white' ? 'black' : 'white';
+    let oponentMoves = newGame.allFigureMoves(oponentColor);
+    let moves = kingMoves.filter((move) => {
+        return !oponentMoves.some((oponentMove) => {
+            return oponentMove[0] === move[0] && oponentMove[1] === move[1];
+        });
+    });
+    return moves;
+}
+
+//Функція для відображення чеку
+function checkIndicator (GameState) {
+    const check = document.querySelector('.check');
+    if (GameState.check) {
+        check.textContent = `${GameState.currentPlayer} is in check`;
+    } else {
+        check.textContent = '';
+    }
 }

@@ -54,7 +54,7 @@ export class GameState {
                 king.col = 6;
                 rook.isFirstMove = false;
                 king.isFirstMove = false;
-            } 
+            }
             this.lastMove.prevPossition = [currentRow, currentCol];
             this.lastMove.nextPossition = [newRow, newCol];
             this.lastMove.lastMovedFigure = moveFigure;
@@ -69,7 +69,7 @@ export class GameState {
             moveFigure.col = newCol;
             moveFigure.hasOwnProperty('isFirstMove') ? moveFigure.isFirstMove = false : null;
         }
-        // Перевірка на превращення пішака
+        // Перевірка на перетворення пішака
         if (moveFigure.type === 'pawn' && moveFigure.color === 'white' && newRow === 0) {
             document.querySelector('.change-pawn').showModal();
         } else if (moveFigure.type === 'pawn' && moveFigure.color === 'black' && newRow === 7) {
@@ -79,12 +79,60 @@ export class GameState {
     }
     checkForCheck() {
         // Перевіряє чи є шах
+        let oponentColor = this.currentPlayer === 'white' ? 'black' : 'white';
+        let kingRow, kingCol;
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+               if (this.board[row][col] !== null && this.board[row][col].type === 'king' && this.board[row][col].color === this.currentPlayer) {
+                console.log(this.board[row][col]);
+                   kingRow = row;
+                   kingCol = col;
+               }
+            }
+        }
+        let allOponentMoves = this.allFigureMoves(oponentColor);
+        if (allOponentMoves.some(move => move[0] === kingRow && move[1] === kingCol)) {
+            this.check = true;
+        } else {
+            this.check = false;
+        }
     }
     checkForCheckmate() {
         // Перевіряє чи є мат
     }
     checkForStalemate() {
         // Перевіряє чи є пат
+    }
+    allFigureMoves(color) {
+        // Повертає всі можливі ходи для атаки всіх фігур певного кольору
+        let allMoves = [];
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                if (this.board[row][col] !== null && this.board[row][col].color === color && this.board[row][col].type !== 'pawn') {
+                    let figureMoves = this.board[row][col].allPosibleMoves(this);
+                    allMoves.push(...figureMoves);
+                } else if (this.board[row][col] !== null && this.board[row][col].color === color && this.board[row][col].type === 'pawn') {
+                    if (this.board[row][col].color === 'white') {
+                        if (this.board[row - 1][col - 1] === null) {
+                            allMoves.push([row - 1, col - 1]);
+                        }
+                        if (this.board[row - 1][col + 1] === null) {
+                            allMoves.push([row - 1, col + 1]);
+                        }
+                    }
+                    if (this.board[row][col].color === 'black') {
+                        if (this.board[row + 1][col - 1] === null) {
+                            allMoves.push([row + 1, col - 1]);
+                        }
+                        if (this.board[row + 1][col + 1] === null) {
+                            allMoves.push([row + 1, col + 1]);
+                        }
+                    }
+                }
+                
+            }
+        }
+        return allMoves;
     }
     addFigureOnBoard() {
         for (let row = 0; row < 8; row++) {
@@ -617,5 +665,6 @@ export class King extends Figure {
             AllposibleMoves.push([this.row, this.col - 4]);
         }
         return AllposibleMoves;
+
     }
 }
