@@ -39,16 +39,16 @@ board.addEventListener('click', (event) => {
     if (takeFigure && currentFigure == null) {
         currentFigure = selectedFigure;
         takeFigure = false;
-        if (selectedFigure.allPosibleMoves(newGame).length === 0) {
+        if (selectedFigure.allPosibleMoves(newGame, 'move').length === 0 && selectedFigure.allPosibleMoves(newGame, 'attack').length === 0) {
             takeFigure = true;
             currentFigure = null;
             return;
         }
-        let selectedFigureMoves = selectedFigure.allPosibleMoves(newGame);
+        let selectedFigureMoves = selectedFigure.allPosibleMoves(newGame, 'move').concat(selectedFigure.allPosibleMoves(newGame, 'attack'));
         if (selectedFigure.type === 'king') {
             selectedFigureMoves = kingMoveRestriction(selectedFigureMoves);
-            
         }
+        
         selectedFigureMoves.forEach((move) => {
             let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
             cell.classList.add('posiblMove');
@@ -58,9 +58,12 @@ board.addEventListener('click', (event) => {
         });
         
     } else if (takeFigure === false && currentFigure == selectedFigure) {
-        selectedFigure.allPosibleMoves(newGame).forEach((move) => {
+        selectedFigure.allPosibleMoves(newGame, 'move').forEach((move) => {
             let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
             cell.classList.remove('posiblMove');
+        });
+        selectedFigure.allPosibleMoves(newGame, 'attack').forEach((move) => {
+            let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
             cell.classList.remove('posiblAttack');
         });
         takeFigure = true;
