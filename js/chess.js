@@ -125,12 +125,42 @@ export class GameState {
     }
     checkForCheckmate() {
         // Перевіряє чи є мат
+        let otherFigures = [];
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                if (this.board[row][col] !== null && this.board[row][col].color === this.currentPlayer) {
+                    otherFigures.push(this.board[row][col]);
+                }
+            }
+        }
+        if (this.check) {
+            otherFigures.forEach(figure => {
+                if (this.possibleBoardState(figure)) {
+                    this.checkmate = true;
+                    return true;
+                } else {
+                    this.checkmate = false;
+                    return false;
+                }
+            });
+        }
+    }
+    possibleBoardState(ourFigure) {
+        const oldBoard = this.board;
+        const moveList = [...ourFigure.allPosibleMoves(this, 'move'), ...ourFigure.allPosibleMoves(this, 'attack')];
+        let checkIsEnd = false;
+        moveList.forEach(move => {
+            this.moveFigure(ourFigure.row, ourFigure.col, move[0], move[1]);
+            this.checkForCheck() ? null : checkIsEnd = true;
+        });
+        this.board = oldBoard;
+        return checkIsEnd;
     }
     checkForStalemate() {
         // Перевіряє чи є пат
     }
     allFigureMoves(color) {
-        // Повертає всі можливі ходи для атаки всіх фігур певного кольору
+        // Повертає всі можливі ходи для атаки всіх фігур певного кольору і захисту союзних фігур
         let allMoves = [];
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
@@ -181,7 +211,6 @@ export class Figure {
         return AllposibleMoves // Масив з правилами для фігури;
     }
 }
-
 export function reloadBoard(GameState) {
     // Перезавантажує дошку на сторінці зі станом дошки з GameState
     const figuresList = {
