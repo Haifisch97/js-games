@@ -30,62 +30,69 @@ export class GameState {
 
         if (moveFigure.type === 'king' && Math.abs(currentCol - newCol) === 2) {
             //Робимо рокіровку
-                king = moveFigure;
-                if (currentCol - newCol === -2) {
-                    rook = this.board[currentRow][7];
-                    console.log(rook);
-                    this.board[currentRow][5] = rook;
-                    this.board[currentRow][6] = king;
-                    this.board[currentRow][7] = null;
-                    this.board[currentRow][4] = null;
-                    rook.col = 5;
-                    king.col = 6;
-                    rook.isFirstMove = false;
-                    king.isFirstMove = false;
-                } else if (currentCol - newCol === 2) {
-                    rook = this.board[currentRow][0];
-                    this.board[currentRow][3] = rook;
-                    this.board[currentRow][2] = king;
-                    this.board[currentRow][0] = null;
-                    this.board[currentRow][4] = null;
-                    rook.col = 3;
-                    king.col = 2;
-                    rook.isFirstMove = false;
-                    king.isFirstMove = false;
+            king = moveFigure;
+            if (currentCol - newCol === -2) {
+                rook = this.board[currentRow][7];
+                console.log(rook);
+                this.board[currentRow][5] = rook;
+                this.board[currentRow][6] = king;
+                this.board[currentRow][7] = null;
+                this.board[currentRow][4] = null;
+                rook.col = 5;
+                king.col = 6;
+                rook.isFirstMove = false;
+                king.isFirstMove = false;
+            } else if (currentCol - newCol === 2) {
+                rook = this.board[currentRow][0];
+                this.board[currentRow][3] = rook;
+                this.board[currentRow][2] = king;
+                this.board[currentRow][0] = null;
+                this.board[currentRow][4] = null;
+                rook.col = 3;
+                king.col = 2;
+                rook.isFirstMove = false;
+                king.isFirstMove = false;
+            }
+        } else if (moveFigure.type === 'rook' && this.board[newRow][newCol] !== null && this.board[newRow][newCol].type === 'king') {
+            rook = moveFigure;
+            king = this.board[newRow][newCol];
+            if (rook.col === 7) {
+                console.log(rook);
+                this.board[currentRow][5] = rook;
+                this.board[currentRow][6] = king;
+                this.board[currentRow][7] = null;
+                this.board[currentRow][4] = null;
+                rook.col = 5;
+                king.col = 6;
+                rook.isFirstMove = false;
+                king.isFirstMove = false;
+            } else if (rook.col === 0) {
+                this.board[currentRow][3] = rook;
+                this.board[currentRow][2] = king;
+                this.board[currentRow][0] = null;
+                this.board[currentRow][4] = null;
+                rook.col = 3;
+                king.col = 2;
+                rook.isFirstMove = false;
+                king.isFirstMove = false;
+            }
+        } else {
+            // Хід en passant
+            if (moveFigure.type === 'pawn' && this.board[newRow][newCol] === null && newCol !== currentCol) {
+                if (moveFigure.color === 'white') {
+                    this.board[newRow + 1][newCol] = null;
+                } else if (moveFigure.color === 'black') {
+                    this.board[newRow - 1][newCol] = null;
                 }
-            } else if (moveFigure.type === 'rook' && this.board[newRow][newCol] !== null && this.board[newRow][newCol].type === 'king') {
-                rook = moveFigure;
-                king = this.board[newRow][newCol];
-                if (rook.col === 7) {
-                    console.log(rook);
-                    this.board[currentRow][5] = rook;
-                    this.board[currentRow][6] = king;
-                    this.board[currentRow][7] = null;
-                    this.board[currentRow][4] = null;
-                    rook.col = 5;
-                    king.col = 6;
-                    rook.isFirstMove = false;
-                    king.isFirstMove = false;
-                } else if (rook.col === 0) {
-                    this.board[currentRow][3] = rook;
-                    this.board[currentRow][2] = king;
-                    this.board[currentRow][0] = null;
-                    this.board[currentRow][4] = null;
-                    rook.col = 3;
-                    king.col = 2;
-                    rook.isFirstMove = false;
-                    king.isFirstMove = false;
-                }
-            } else {
+            }
             // Переміщуємо фігуру на нову позицію
-
             this.board[newRow][newCol] = moveFigure;
             this.board[currentRow][currentCol] = null;
             moveFigure.row = newRow;
             moveFigure.col = newCol;
             moveFigure.hasOwnProperty('isFirstMove') ? moveFigure.isFirstMove = false : null;
         }
-                    
+
         this.lastMove.prevPossition = [currentRow, currentCol];
         this.lastMove.nextPossition = [newRow, newCol];
         this.lastMove.lastMovedFigure = moveFigure;
@@ -241,7 +248,13 @@ export class Pawn extends Figure {
                 } else if (GameState.board[this.row + 1][this.col + 1] === null) {
                     posiblDefence.push([this.row + 1, this.col + 1]);
                 }
+            } else if (this.row + 1 < 8 && this.col + 1 < 8 && GameState.board[this.row + 1][this.col + 1] === null && GameState.lastMove.lastMovedFigure !== null
+                && GameState.lastMove.lastMovedFigure.type === 'pawn' && GameState.lastMove.lastMovedFigure.color === 'white'
+                && Math.abs(GameState.lastMove.nextPossition[0] - GameState.lastMove.prevPossition[0]) === 2
+                && GameState.lastMove.nextPossition[1] === this.col + 1 && GameState.lastMove.nextPossition[0] === this.row) {
+                posiblAttacks.push([this.row + 1, this.col + 1]);
             }
+
             if (GameState.board[this.row + 1][this.col - 1] !== null && this.row + 1 < 8 && this.col - 1 >= 0) {
                 if (GameState.board[this.row + 1][this.col - 1].color === 'white') {
                     posiblAttacks.push([this.row + 1, this.col - 1]);
@@ -250,6 +263,11 @@ export class Pawn extends Figure {
                 } else if (GameState.board[this.row + 1][this.col - 1] === null) {
                     posiblDefence.push([this.row + 1, this.col - 1]);
                 }
+            } else if (this.row + 1 < 8 && this.col - 1 >= 0 && GameState.board[this.row + 1][this.col - 1] === null && GameState.lastMove.lastMovedFigure !== null
+                && GameState.lastMove.lastMovedFigure.type === 'pawn' && GameState.lastMove.lastMovedFigure.color === 'white'
+                && Math.abs(GameState.lastMove.nextPossition[0] - GameState.lastMove.prevPossition[0]) === 2
+                && GameState.lastMove.nextPossition[1] === this.col - 1 && GameState.lastMove.nextPossition[0] === this.row) {
+                posiblAttacks.push([this.row + 1, this.col - 1]);
             }
         } else if (this.color === 'white') {
             if (this.row - 1 >= 0 && GameState.board[this.row - 1][this.col] === null) {
@@ -268,6 +286,11 @@ export class Pawn extends Figure {
                 } else if (GameState.board[this.row - 1][this.col + 1] === null) {
                     posiblDefence.push([this.row - 1, this.col + 1]);
                 }
+            } else if (this.row - 1 >= 0 && this.col + 1 < 8 && GameState.board[this.row - 1][this.col + 1] === null && GameState.lastMove.lastMovedFigure !== null
+                && GameState.lastMove.lastMovedFigure.type === 'pawn' && GameState.lastMove.lastMovedFigure.color === 'black'
+                && Math.abs(GameState.lastMove.nextPossition[0] - GameState.lastMove.prevPossition[0]) === 2
+                && GameState.lastMove.nextPossition[1] === this.col + 1 && GameState.lastMove.nextPossition[0] === this.row) {
+                posiblAttacks.push([this.row - 1, this.col + 1]);
             }
             if (GameState.board[this.row - 1][this.col - 1] !== null && this.row - 1 >= 0 && this.col - 1 >= 0) {
                 if (GameState.board[this.row - 1][this.col - 1].color === 'black') {
@@ -277,6 +300,11 @@ export class Pawn extends Figure {
                 } else if (GameState.board[this.row - 1][this.col - 1] === null) {
                     posiblDefence.push([this.row - 1, this.col - 1]);
                 }
+            } else if (this.row - 1 >= 0 && this.col - 1 >= 0 && GameState.board[this.row - 1][this.col - 1] === null && GameState.lastMove.lastMovedFigure !== null
+                && GameState.lastMove.lastMovedFigure.type === 'pawn' && GameState.lastMove.lastMovedFigure.color === 'black'
+                && Math.abs(GameState.lastMove.nextPossition[0] - GameState.lastMove.prevPossition[0]) === 2
+                && GameState.lastMove.nextPossition[1] === this.col - 1 && GameState.lastMove.nextPossition[0] === this.row) {
+                posiblAttacks.push([this.row - 1, this.col - 1]);
             }
         }
 
