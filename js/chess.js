@@ -28,7 +28,7 @@ export class GameState {
         let moveFigure = this.board[currentRow][currentCol];
         let king, rook;
 
-        if (moveFigure.type === 'king' && Math.abs(currentCol - newCol) === 2) {
+        if (moveFigure.type === 'king' && Math.abs(currentCol - newCol) === 2 ) {
             //Робимо рокіровку
             king = moveFigure;
             if (currentCol - newCol === -2) {
@@ -133,14 +133,15 @@ export class GameState {
                 }
             }
         }
+        console.log(otherFigures);
         if (this.check) {
             otherFigures.forEach(figure => {
                 if (this.possibleBoardState(figure)) {
-                    this.checkmate = true;
-                    return true;
-                } else {
                     this.checkmate = false;
-                    return false;
+                    return false
+                } else {
+                    this.checkmate = true;
+                    return true
                 }
             });
         }
@@ -151,7 +152,9 @@ export class GameState {
         let checkIsEnd = false;
         moveList.forEach(move => {
             this.moveFigure(ourFigure.row, ourFigure.col, move[0], move[1]);
-            this.checkForCheck() ? null : checkIsEnd = true;
+            this.checkForCheck()
+            this.check ? null : checkIsEnd = true;
+            this.board = oldBoard;
         });
         this.board = oldBoard;
         return checkIsEnd;
@@ -269,7 +272,7 @@ export class Pawn extends Figure {
                 // Повертає правила для першого ходу білого пішака
                 posibleMoves.push([this.row + 2, this.col]);
             }
-            if (GameState.board[this.row + 1][this.col + 1] !== null && this.row + 1 < 8 && this.col + 1 < 8) {
+            if (this.row + 1 < 8 && this.col + 1 < 8 && GameState.board[this.row + 1][this.col + 1] !== null) {
                 if (GameState.board[this.row + 1][this.col + 1].color === 'white') {
                     posiblAttacks.push([this.row + 1, this.col + 1]);
                 } else if (GameState.board[this.row + 1][this.col + 1].color === 'black') {
@@ -284,7 +287,7 @@ export class Pawn extends Figure {
                 posiblAttacks.push([this.row + 1, this.col + 1]);
             }
 
-            if (GameState.board[this.row + 1][this.col - 1] !== null && this.row + 1 < 8 && this.col - 1 >= 0) {
+            if (this.row + 1 < 8 && this.col - 1 >= 0 && GameState.board[this.row + 1][this.col - 1] !== null) {
                 if (GameState.board[this.row + 1][this.col - 1].color === 'white') {
                     posiblAttacks.push([this.row + 1, this.col - 1]);
                 } else if (GameState.board[this.row + 1][this.col - 1].color === 'black') {
@@ -307,7 +310,7 @@ export class Pawn extends Figure {
                 // Повертає правила для першого ходу чорного пішака
                 posibleMoves.push([this.row - 2, this.col]);
             }
-            if (GameState.board[this.row - 1][this.col + 1] !== null && this.row - 1 >= 0 && this.col + 1 < 8) {
+            if (this.row - 1 >= 0 && this.col + 1 < 8 && GameState.board[this.row - 1][this.col + 1] !== null) {
                 if (GameState.board[this.row - 1][this.col + 1].color === 'black') {
                     posiblAttacks.push([this.row - 1, this.col + 1]);
                 } else if (GameState.board[this.row - 1][this.col + 1].color === 'white') {
@@ -321,7 +324,7 @@ export class Pawn extends Figure {
                 && GameState.lastMove.nextPossition[1] === this.col + 1 && GameState.lastMove.nextPossition[0] === this.row) {
                 posiblAttacks.push([this.row - 1, this.col + 1]);
             }
-            if (GameState.board[this.row - 1][this.col - 1] !== null && this.row - 1 >= 0 && this.col - 1 >= 0) {
+            if (this.row - 1 >= 0 && this.col - 1 >= 0 && GameState.board[this.row - 1][this.col - 1] !== null) {
                 if (GameState.board[this.row - 1][this.col - 1].color === 'black') {
                     posiblAttacks.push([this.row - 1, this.col - 1]);
                 } else if (GameState.board[this.row - 1][this.col - 1].color === 'white') {

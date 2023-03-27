@@ -13,16 +13,16 @@ const newGame = new chess.GameState();
 newGame.nameFigureList = Figures;
 //тестова дошка
 
-newGame.board = [
-    ['   ', '   ', '   ', '   ', '   ', '   ', 'BkK', 'BkR'],
-    ['   ', '   ', '   ', '   ', '   ', '   ', 'BkP', 'BkP'],
-    ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-    ['   ', '   ', '   ', '   ', 'WtQ', '   ', '   ', '   '],
-    ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-    ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-    ['WtP', '   ', '   ', '   ', '   ', '   ', '   ', 'WtP'],
-    ['WtR', '   ', '   ', '   ', 'WtK', '   ', '   ', 'WtR']
-]
+// newGame.board = [
+//     ['   ', '   ', '   ', '   ', '   ', '   ', 'BkK', 'BkR'],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', 'BkP', 'BkP'],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', 'WtQ', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['WtP', '   ', '   ', '   ', '   ', '   ', '   ', 'WtP'],
+//     ['WtR', '   ', '   ', '   ', 'WtK', '   ', '   ', 'WtR']
+// ]
 
 newGame.addFigureOnBoard(Figures);
 chess.reloadBoard(newGame);
@@ -61,10 +61,12 @@ function visiblePossibleMove (event) {
         selectedFigure.allPosibleMoves(newGame, 'move').forEach((move) => {
             let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
             cell.classList.remove('posiblMove');
+            cell.classList.remove('posiblAttack');
         });
         selectedFigure.allPosibleMoves(newGame, 'attack').forEach((move) => {
             let cell = document.querySelector(`[data-row="${move[0]}"][data-col="${move[1]}"]`);
             cell.classList.remove('posiblAttack');
+            cell.classList.remove('posiblMove');
         });
         takeFigure = true;
         currentFigure = null;
@@ -79,7 +81,8 @@ function moveFigureOnBoard (event) {
         indicatorLastMove(newGame);
         chess.reloadBoard(newGame);
         newGame.checkForCheck()
-        newGame.checkForCheckmate()
+        checkIndicator(newGame);
+        // newGame.checkForCheckmate()
         const cellsMoves = document.querySelectorAll('.posiblMove');
         const cellsAttack = document.querySelectorAll('.posiblAttack');
         cellsMoves.forEach((cell) => {
@@ -93,7 +96,6 @@ function moveFigureOnBoard (event) {
         if (newGame.checkmate) {
             gameOver(newGame);
         } else if (newGame.check) {
-            checkIndicator(newGame);
         }
     }
 }
