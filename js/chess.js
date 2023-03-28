@@ -102,6 +102,8 @@ export class GameState {
         } else if (moveFigure.type === 'pawn' && moveFigure.color === 'black' && newRow === 7) {
             document.querySelector('.change-pawn').showModal();
         }
+        this.checkForCheck();
+
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
     }
     checkForCheck() {
@@ -125,42 +127,56 @@ export class GameState {
     }
     checkForCheckmate() {
         // Перевіряє чи є мат
-        let otherFigures = [];
+        let allFigure = [];
+        let psblMove = [];
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
                 if (this.board[row][col] !== null && this.board[row][col].color === this.currentPlayer) {
-                    otherFigures.push(this.board[row][col]);
+                    allFigure.push(this.board[row][col]);
                 }
             }
         }
-        console.log(otherFigures);
-        if (this.check) {
-            otherFigures.forEach(figure => {
-                if (this.possibleBoardState(figure)) {
-                    this.checkmate = false;
-                    return false
-                } else {
-                    this.checkmate = true;
-                    return true
-                }
-            });
+        allFigure.forEach(figure => {
+            let figureMoves = [...figure.allPosibleMoves(this, 'attack'),...figure.allPosibleMoves(this, 'move')];
+            psblMove.push(...this.possibleBoardState(figure, figureMoves));
+        });
+        if (this.check && psblMove.length === 0) {
+            this.checkmate = true;
+        } else {
+            this.checkmate = false;
         }
     }
-    possibleBoardState(ourFigure) {
-        const oldBoard = this.board;
-        const moveList = [...ourFigure.allPosibleMoves(this, 'move'), ...ourFigure.allPosibleMoves(this, 'attack')];
-        let checkIsEnd = false;
+    possibleBoardState(ourFigure, moveList) {
+        // Перевіряє чи є можливість зробити хід для фігур, щоб не був відкритий король
+        const oldState = _.cloneDeep(this);
+        const filtredMoves = [];
         moveList.forEach(move => {
-            this.moveFigure(ourFigure.row, ourFigure.col, move[0], move[1]);
-            this.checkForCheck()
-            this.check ? null : checkIsEnd = true;
-            this.board = oldBoard;
+            let localState = _.cloneDeep(oldState);
+            localState.moveFigure(ourFigure.row, ourFigure.col, move[0], move[1]);
+            localState.check ? null : filtredMoves.push(move);
         });
-        this.board = oldBoard;
-        return checkIsEnd;
+        return filtredMoves;
     }
     checkForStalemate() {
         // Перевіряє чи є пат
+        let allFigure = [];
+        let psblMove = [];
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                if (this.board[row][col] !== null && this.board[row][col].color === this.currentPlayer) {
+                    allFigure.push(this.board[row][col]);
+                }
+            }
+        }
+        allFigure.forEach(figure => {
+            let figureMoves = [...figure.allPosibleMoves(this, 'attack'),...figure.allPosibleMoves(this, 'move')];
+            psblMove.push(...this.possibleBoardState(figure, figureMoves));
+        });
+        if (!this.check && psblMove.length === 0) {
+            this.stalemate = true;
+        } else {
+            this.stalemate = false;
+        }
     }
     allFigureMoves(color) {
         // Повертає всі можливі ходи для атаки всіх фігур певного кольору і захисту союзних фігур
@@ -171,7 +187,7 @@ export class GameState {
                     let figure = this.board[row][col];
                     allMoves.push(...figure.allPosibleMoves(this, 'move'));
                     allMoves.push(...figure.allPosibleMoves(this, 'attack'));
-                    allMoves.push(...figure.allPosibleMoves(this, 'deffence'));
+                    allMoves.push(...figure.allPosibleMoves(this, 'protect'));
                 }
 
             }

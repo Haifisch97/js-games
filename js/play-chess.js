@@ -14,14 +14,14 @@ newGame.nameFigureList = Figures;
 //тестова дошка
 
 // newGame.board = [
-//     ['   ', '   ', '   ', '   ', '   ', '   ', 'BkK', 'BkR'],
-//     ['   ', '   ', '   ', '   ', '   ', '   ', 'BkP', 'BkP'],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', 'BkK'],
+//     ['   ', '   ', '   ', '   ', '   ', '   ', 'BkP', '   '],
 //     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
 //     ['   ', '   ', '   ', '   ', 'WtQ', '   ', '   ', '   '],
 //     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
 //     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
-//     ['WtP', '   ', '   ', '   ', '   ', '   ', '   ', 'WtP'],
-//     ['WtR', '   ', '   ', '   ', 'WtK', '   ', '   ', 'WtR']
+//     ['   ', '   ', '   ', '   ', '   ', '   ', '   ', '   '],
+//     ['   ', '   ', 'WtK', '   ', '   ', '   ', '   ', '   ']
 // ]
 
 newGame.addFigureOnBoard(Figures);
@@ -30,6 +30,7 @@ chess.reloadBoard(newGame);
 const board = document.querySelector('.board');
 let takeFigure = true;
 let currentFigure = null;
+let currentFigureMoves = null;
 //Прослуховувач подій для вибору фігури і відображення можливих ходів
 board.addEventListener('click', visiblePossibleMove);
 function visiblePossibleMove (event) {
@@ -41,9 +42,9 @@ function visiblePossibleMove (event) {
         currentFigure = selectedFigure;
         takeFigure = false;
         let selectedFigureMoves = selectedFigure.allPosibleMoves(newGame, 'move').concat(selectedFigure.allPosibleMoves(newGame, 'attack'));
-        if (selectedFigure.type === 'king') {
-            selectedFigureMoves = kingMoveRestriction(selectedFigureMoves);
-        }
+        selectedFigureMoves = newGame.possibleBoardState( selectedFigure, selectedFigureMoves);
+        currentFigureMoves = selectedFigureMoves;
+        
         if (selectedFigureMoves.length === 0) {
             takeFigure = true;
             currentFigure = null;
@@ -76,13 +77,10 @@ function visiblePossibleMove (event) {
 board.addEventListener('click', moveFigureOnBoard);
 function moveFigureOnBoard (event) {
     const selectedCell = event.target;
-    if (selectedCell.classList.contains('posiblMove') || selectedCell.classList.contains('posiblAttack')) {
+    if ((selectedCell.classList.contains('posiblMove') || selectedCell.classList.contains('posiblAttack')) && currentFigure !== null) {
         newGame.moveFigure(currentFigure.row, currentFigure.col, Number(selectedCell.dataset.row), Number(selectedCell.dataset.col));
         indicatorLastMove(newGame);
         chess.reloadBoard(newGame);
-        newGame.checkForCheck()
-        checkIndicator(newGame);
-        // newGame.checkForCheckmate()
         const cellsMoves = document.querySelectorAll('.posiblMove');
         const cellsAttack = document.querySelectorAll('.posiblAttack');
         cellsMoves.forEach((cell) => {
@@ -93,11 +91,15 @@ function moveFigureOnBoard (event) {
         });
         takeFigure = true;
         currentFigure = null;
-        if (newGame.checkmate) {
-            gameOver(newGame);
-        } else if (newGame.check) {
-        }
-    }
+        indicatorLastMove(newGame);
+    }    
+    newGame.checkForCheck();
+    newGame.checkForCheckmate();
+    newGame.checkForStalemate();
+    checkIndicator(newGame);
+    checkStalemate(newGame);
+    gameOver(newGame);
+
 }
 // Прослуховувач подій для вибору фігури для заміни пішака
 const modalWindow = document.querySelector('.change-pawn');
@@ -123,18 +125,6 @@ function indicatorLastMove(GameState) {
 
 }
 
-//Функція для обмеження ходів короля
-function kingMoveRestriction(kingMoves) {
-    let oponentColor = newGame.currentPlayer === 'white' ? 'black' : 'white';
-    let oponentMoves = newGame.allFigureMoves(oponentColor);
-    let moves = kingMoves.filter((move) => {
-        return !oponentMoves.some((oponentMove) => {
-            return oponentMove[0] === move[0] && oponentMove[1] === move[1];
-        });
-    });
-    return moves;
-}
-
 //Функція для відображення чеку
 function checkIndicator(GameState) {
     const check = document.querySelector('.check');
@@ -150,6 +140,16 @@ function gameOver(GameState) {
     const check = document.querySelector('.check');
     if (GameState.checkmate) {
         check.textContent = `${GameState.currentPlayer} is in checkmate`;
+        board.removeEventListener('click', moveFigureOnBoard);
+        board.removeEventListener('click', visiblePossibleMove);
+    }
+}
+
+//Функція для відображення пату
+function checkStalemate(GameState) {
+    const check = document.querySelector('.check');
+    if (GameState.stalemate) {
+        check.textContent = `Stalemate`;
         board.removeEventListener('click', moveFigureOnBoard);
         board.removeEventListener('click', visiblePossibleMove);
     }
