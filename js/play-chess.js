@@ -135,6 +135,13 @@ modalWindow.addEventListener('click', (event) => {
         chess.upgragePawn(newGame, newFigureName);
         chess.reloadBoard(newGame);
         modalWindow.close();
+        newGame.checkForCheck();
+        newGame.checkForCheckmate();
+        newGame.checkForStalemate();
+        checkIndicator(newGame);
+        checkStalemate(newGame);
+        gameOver(newGame);
+    
     }
 });
 // Функція для відображення попереднього ходу
