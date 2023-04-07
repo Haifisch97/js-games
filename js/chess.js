@@ -14,6 +14,7 @@ export class GameState {
         ]; // Зберігаємо стан дошки в масиві 
         this.currentPlayer = 'white'; // Зберігаємо поточного гравця
         this.nameFigureList = null;
+        this.test = false;
         this.check = false; // Чи є шах
         this.checkmate = false; // Чи є мат
         this.stalemate = false; // Чи є пат
@@ -33,7 +34,6 @@ export class GameState {
             king = moveFigure;
             if (currentCol - newCol === -2) {
                 rook = this.board[currentRow][7];
-                console.log(rook);
                 this.board[currentRow][5] = rook;
                 this.board[currentRow][6] = king;
                 this.board[currentRow][7] = null;
@@ -57,7 +57,6 @@ export class GameState {
             rook = moveFigure;
             king = this.board[newRow][newCol];
             if (rook.col === 7) {
-                console.log(rook);
                 this.board[currentRow][5] = rook;
                 this.board[currentRow][6] = king;
                 this.board[currentRow][7] = null;
@@ -78,7 +77,7 @@ export class GameState {
             }
         } else {
             // Хід en passant
-            if (moveFigure.type === 'pawn' && this.board[newRow][newCol] === null && newCol !== currentCol) {
+            if (moveFigure.type === 'pawn' && this.board[newRow][newCol] === null && newCol !== currentCol ) {
                 if (moveFigure.color === 'white') {
                     this.board[newRow + 1][newCol] = null;
                 } else if (moveFigure.color === 'black') {
@@ -93,15 +92,17 @@ export class GameState {
             moveFigure.hasOwnProperty('isFirstMove') ? moveFigure.isFirstMove = false : null;
         }
 
+        // Перевірка на перетворення пішака
+        if (moveFigure.type === 'pawn' && moveFigure.color === 'white' && newRow === 0 && this.currentPlayer === 'white' && !this.test) {
+           
+            document.querySelector('.change-pawn').showModal();
+        } else if (moveFigure.type === 'pawn' && moveFigure.color === 'black' && newRow === 7 && this.currentPlayer === 'black' && !this.test) {
+          
+            document.querySelector('.change-pawn').showModal();
+        }
         this.lastMove.prevPossition = [currentRow, currentCol];
         this.lastMove.nextPossition = [newRow, newCol];
         this.lastMove.lastMovedFigure = moveFigure;
-        // Перевірка на перетворення пішака
-        if (moveFigure.type === 'pawn' && moveFigure.color === 'white' && newRow === 0) {
-            document.querySelector('.change-pawn').showModal();
-        } else if (moveFigure.type === 'pawn' && moveFigure.color === 'black' && newRow === 7) {
-            document.querySelector('.change-pawn').showModal();
-        }
         this.checkForCheck();
 
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
@@ -149,6 +150,7 @@ export class GameState {
     possibleBoardState(ourFigure, moveList) {
         // Перевіряє чи є можливість зробити хід для фігур, щоб не був відкритий король
         const oldState = _.cloneDeep(this);
+        oldState.test = true;
         const filtredMoves = [];
         moveList.forEach(move => {
             let localState = _.cloneDeep(oldState);
